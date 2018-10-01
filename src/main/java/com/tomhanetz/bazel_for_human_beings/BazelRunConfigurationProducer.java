@@ -24,6 +24,9 @@ public class BazelRunConfigurationProducer extends RunConfigurationProducer<Baze
 
     private String getBazelPath(ConfigurationContext configurationContext) throws IOException {
         String bazelPath = BazelApplicationSettings.getInstance().getBazelQueryPath();
+        if (configurationContext.getLocation() == null || configurationContext.getLocation().getVirtualFile() == null){
+            return null;
+        }
         String directoryPath = configurationContext.getLocation().getVirtualFile().getParent().getPath();
         String name = configurationContext.getLocation().getVirtualFile().getName();
 
@@ -41,14 +44,11 @@ public class BazelRunConfigurationProducer extends RunConfigurationProducer<Baze
 
     @Override
     protected boolean setupConfigurationFromContext(BazelRunConfiguration bazelRunConfiguration, ConfigurationContext configurationContext, Ref<PsiElement> ref) {
-        long start = System.currentTimeMillis();
         try {
             // returns //a/b/c:my_exec
             String bazelExecutablePath = getBazelPath(configurationContext);
             bazelRunConfiguration.setName("BAZEL: " + bazelExecutablePath);
             log.info("Successfully received bazel executable path of: " + bazelExecutablePath);
-            long end = System.currentTimeMillis();
-            log.info(String.format("one command on this shitty bazel took %d millis", (end-start)));
 
             bazelRunConfiguration.setBazelExecutablePath(bazelExecutablePath);
             return true;

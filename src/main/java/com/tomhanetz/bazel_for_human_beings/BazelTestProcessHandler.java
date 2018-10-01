@@ -108,7 +108,7 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     }
 
     private void parseCommands(String text, @NotNull Key outputType){
-        log.info("received text: " + text);
+        log.debug("received text: " + text);
 
         if(text == null){
             return;
@@ -136,7 +136,6 @@ public class BazelTestProcessHandler extends OSProcessHandler {
                 return;
             }
             failedTestLastRow = text.replaceAll("\n","").replaceAll("\r", "");
-            log.info("Adding row to trace: " + failedTestLastRow);
             failedTestTraceback += failedTestLastRow + "|r|n";
             return;
         }
