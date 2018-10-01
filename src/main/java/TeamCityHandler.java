@@ -19,8 +19,8 @@ public class TeamCityHandler {
         return String.format("##teamcity[testFailed name='%s' message='%s' details='%s']", testName, message, detailes);
     }
 
-    public static String testFinished(String testName){
-        return String.format("##teamcity[testFinished name='%s']", testName);
+    public static String testFinished(String testName, int duration){
+        return String.format("##teamcity[testFinished name='%s' duration='%d']", testName, duration);
     }
 
     public static String testSuiteFinished(String testSuiteName){

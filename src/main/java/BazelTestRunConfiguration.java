@@ -60,38 +60,12 @@ public class BazelTestRunConfiguration extends LocatableConfigurationBase implem
             @NotNull
             @Override
             protected ProcessHandler startProcess() throws ExecutionException {
-                String args[] = {BazelApplicationSettings.getInstance().getBazelRunPath(), "test", getBazelExecutablePath()};
-                //String args[] = {"python", "/Users/tomhanetz/PycharmProjects/testim/teamcity_testout.py"};
+                String args[] = {BazelApplicationSettings.getInstance().getBazelRunPath(), "test", "--test_output=errors", getBazelExecutablePath()};
                 GeneralCommandLine commandLine = new GeneralCommandLine(args);
                 commandLine.setCharset(Charset.forName("UTF-8"));
                 commandLine.setWorkDirectory(environment.getProject().getBasePath());
                 commandLine.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
-                ProcessHandler osProcessHandler = new CapturingProcessHandler(commandLine){
-                    private boolean testSuiteStarted = false;
-                    @Override
-                    protected CapturingProcessAdapter createProcessAdapter(ProcessOutput processOutput) {
-                        return new CapturingProcessAdapter(processOutput);
-                    }
-
-                    @Override
-                    public void notifyTextAvailable(@NotNull String text, @NotNull Key outputType) {
-                        if (!this.testSuiteStarted) {
-                            super.notifyTextAvailable(TeamCityHandler.testSuiteStarted("testSuite1"), ProcessOutputTypes.STDOUT);
-                            super.notifyTextAvailable(TeamCityHandler.testStarted("test1"), ProcessOutputTypes.STDOUT);
-                            this.testSuiteStarted = true;
-                        }
-                        System.out.println("Notifying on text available: " + text);
-                        super.notifyTextAvailable(text, outputType);
-                    }
-
-                    @Override
-                    protected void onOSProcessTerminated(int exitCode) {
-                        notifyTextAvailable(TeamCityHandler.testFailed("test1", "Test failed ok", "no need to talk |r|n about it"), ProcessOutputTypes.STDOUT);
-                        notifyTextAvailable(TeamCityHandler.testFinished("test1"), ProcessOutputTypes.STDOUT);
-                        notifyTextAvailable(TeamCityHandler.testSuiteFinished("testSuite1"), ProcessOutputTypes.STDOUT);
-                        super.onOSProcessTerminated(exitCode);
-                    }
-                };
+                ProcessHandler osProcessHandler = new BazelTestProcessHandler(commandLine, getBazelExecutablePath());
                 return osProcessHandler;
             }
 
