@@ -1,3 +1,5 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.OSProcessHandler;
@@ -82,7 +84,7 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     private int testCount = 0;
     private int failedTestCount = 0;
 
-    private final Logger log = Logger.getInstance("Bazel BazelTestProcessHandler");
+    private final Logger log = Logger.getInstance("Bazel com.tomhanetz.bazel_for_human_beings.BazelTestProcessHandler");
 
     public BazelTestProcessHandler(@NotNull GeneralCommandLine commandLine, String bazelExecCommand) throws ExecutionException {
         super(commandLine);

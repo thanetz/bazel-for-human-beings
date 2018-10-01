@@ -1,3 +1,5 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 public class TeamCityHandler {
 
     //                        ##teamcity[testSuiteStarted name='TomTestSuite2']

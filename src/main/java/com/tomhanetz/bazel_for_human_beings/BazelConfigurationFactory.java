@@ -1,3 +1,5 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;

@@ -1,3 +1,5 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.execution.Location;
 import com.intellij.execution.PsiLocation;
 import com.intellij.execution.testframework.sm.runner.SMTestLocator;

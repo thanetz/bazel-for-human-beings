@@ -1,11 +1,10 @@
 <idea-plugin>
-    <id>com.tomhanetz.bazel-for-human-beings</id>
+    <id>com.tomhanetz.bazel_for_human_beings</id>
     <name>Bazel For Human Beings</name>
-    <vendor email="tomhanetz@gmail.com" url="http://www.yourcompany.com">Tom Hanetz</vendor>
+    <vendor email="tomhanetz@gmail.com" url="">Tom Hanetz</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    Lightweight plugin for python bazel support in all of Jetbrains IntelliJ based products<br>
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
@@ -16,10 +15,10 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <configurationType implementation="BazelConfigurationType"/>
-        <runConfigurationProducer implementation="BazelRunConfigurationProducer" />
-        <applicationConfigurable instance="BazelApplicationSettingsConfigurable"/>
-        <applicationService serviceInterface="BazelApplicationSettings" serviceImplementation="BazelApplicationSettings" />
+        <configurationType implementation="com.tomhanetz.bazel_for_human_beings.BazelConfigurationType"/>
+        <runConfigurationProducer implementation="com.tomhanetz.bazel_for_human_beings.BazelRunConfigurationProducer" />
+        <applicationConfigurable instance="com.tomhanetz.bazel_for_human_beings.BazelApplicationSettingsConfigurable"/>
+        <applicationService serviceInterface="com.tomhanetz.bazel_for_human_beings.BazelApplicationSettings" serviceImplementation="com.tomhanetz.bazel_for_human_beings.BazelApplicationSettings" />
     </extensions>
 
     <actions>

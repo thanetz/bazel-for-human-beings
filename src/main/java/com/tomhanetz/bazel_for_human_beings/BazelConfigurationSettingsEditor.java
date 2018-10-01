@@ -1,6 +1,7 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.ui.LabeledComponent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

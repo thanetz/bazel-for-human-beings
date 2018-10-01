@@ -1,8 +1,8 @@
-import com.intellij.execution.Location;
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.RunConfigurationProducer;
 import com.intellij.openapi.util.Ref;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.openapi.diagnostic.Logger;
 

@@ -1,8 +1,8 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
-import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.icons.AllIcons;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import java.lang.String;
 

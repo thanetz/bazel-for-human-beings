@@ -1,3 +1,5 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;

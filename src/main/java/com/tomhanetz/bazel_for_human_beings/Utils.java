@@ -1,3 +1,5 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +8,7 @@ import com.intellij.openapi.diagnostic.Logger;
 
 public class Utils {
 
-    private static final Logger log = Logger.getInstance("Utils");
+    private static final Logger log = Logger.getInstance("com.tomhanetz.bazel_for_human_beings.Utils");
 
     public static String runCommand(String[] cmds, String directory) throws IOException {
         File directoryHandle = new File(directory);

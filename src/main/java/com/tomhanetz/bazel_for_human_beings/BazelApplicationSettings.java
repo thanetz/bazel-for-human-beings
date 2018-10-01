@@ -1,10 +1,12 @@
+package com.tomhanetz.bazel_for_human_beings;
+
 import com.intellij.openapi.components.*;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @State(
-        name = "BazelApplicationSettings",
+        name = "com.tomhanetz.bazel_for_human_beings.BazelApplicationSettings",
         storages = {
                 @Storage("bazel_4_human_beings_settings.xml")
         }
