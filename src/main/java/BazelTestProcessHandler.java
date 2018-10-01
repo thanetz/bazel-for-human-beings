@@ -2,6 +2,7 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessOutputTypes;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +44,8 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     private float testDuration = 0;
     private boolean isInTraceback = false;
 
+    private final Logger log = Logger.getInstance("Bazel BazelTestProcessHandler");
+
     public BazelTestProcessHandler(@NotNull GeneralCommandLine commandLine, String bazelExecCommand) throws ExecutionException {
         super(commandLine);
         bazelCommand = bazelExecCommand;
@@ -76,12 +79,13 @@ public class BazelTestProcessHandler extends OSProcessHandler {
 //            super.notifyTextAvailable(text, outputType);
 //            return;
 //        }
+        log.info("received text: " + text);
 
         if(text == null){
             return;
         }
 
-        //Get Test Traceback
+//        //Get Test Traceback
         if(text.startsWith("==================== Test output for")){
             isInTraceback = true;
         }
