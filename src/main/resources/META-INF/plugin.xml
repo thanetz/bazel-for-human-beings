@@ -20,8 +20,6 @@
         <runConfigurationProducer implementation="BazelRunConfigurationProducer" />
         <applicationConfigurable instance="BazelApplicationSettingsConfigurable"/>
         <applicationService serviceInterface="BazelApplicationSettings" serviceImplementation="BazelApplicationSettings" />
-        <!--<configurationType implementation="BazelTestConfigurationType"/>-->
-        <!--<runConfigurationProducer implementation="BazelTestRunConfigurationProducer" />-->
     </extensions>
 
     <actions>

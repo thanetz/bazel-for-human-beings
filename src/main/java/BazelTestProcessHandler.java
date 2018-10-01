@@ -40,9 +40,10 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     private String testName = "Test";
     private String bazelCommand;
 
-    private String testTraceback;
+    private String testTraceback = "";
     private float testDuration = 0;
     private boolean isInTraceback = false;
+    private boolean finishedTraceback = false;
 
     private final Logger log = Logger.getInstance("Bazel BazelTestProcessHandler");
 
@@ -86,12 +87,19 @@ public class BazelTestProcessHandler extends OSProcessHandler {
         }
 
 //        //Get Test Traceback
-        if(text.startsWith("==================== Test output for")){
+        if(!finishedTraceback && text.startsWith("===========================")){
             isInTraceback = true;
+            return;
         }
 
         if(isInTraceback){
-
+            if (text.startsWith("Ran ")){
+                isInTraceback = false;
+                finishedTraceback = true;
+                return;
+            }
+            testTraceback += text.replaceAll("\n","").replaceAll("\r", "") + "|r|n";
+            return;
         }
 
         //Get Test Results
@@ -103,7 +111,7 @@ public class BazelTestProcessHandler extends OSProcessHandler {
                 super.notifyTextAvailable("Cached Results", ProcessOutputTypes.STDOUT);
             }
             if (text.contains("FAILED")){
-                super.notifyTextAvailable(TeamCityHandler.testFailed(testName, "Test Failed", "Here should be the traceback"), ProcessOutputTypes.STDOUT);
+                super.notifyTextAvailable(TeamCityHandler.testFailed(testName, "Test Failed", testTraceback), ProcessOutputTypes.STDOUT);
             }
             super.notifyTextAvailable(TeamCityHandler.testFinished(testName, (int)(testDuration * 1000)), ProcessOutputTypes.STDOUT);
         }

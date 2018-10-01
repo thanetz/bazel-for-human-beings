@@ -102,13 +102,7 @@ public class BazelRunConfiguration extends LocatableConfigurationBase implements
                 if(!bazelAction.equals("test")){
                     return super.execute(executor, runner);
                 }
-                SMTRunnerConsoleProperties properties = new SMTRunnerConsoleProperties(thisConfiguration, "Bazel Tet Framework", executor){
-                    @Nullable
-                    @Override
-                    public SMTestLocator getTestLocator() {
-                        return new BazelTestLocator();
-                    }
-                };
+                SMTRunnerConsoleProperties properties = new SMTRunnerConsoleProperties(thisConfiguration, "Bazel Tet Framework", executor);
 
                 ProcessHandler handler = this.startProcess();
                 BaseTestsOutputConsoleView consoleView2 = SMTestRunnerConnectionUtil.createAndAttachConsole("Bazel Tet Framework", handler, properties);
