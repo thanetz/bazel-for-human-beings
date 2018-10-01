@@ -3,6 +3,7 @@ package com.tomhanetz.bazel_for_human_beings;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.util.IconLoader;
 import org.jetbrains.annotations.NotNull;
 import java.lang.String;
 
@@ -29,7 +30,7 @@ public class BazelConfigurationType implements ConfigurationType {
 
     @Override
     public Icon getIcon() {
-        return AllIcons.General.Web;
+        return IconLoader.getIcon("/icons/BazelForHumanBeings.png");
     }
 
     @Override
