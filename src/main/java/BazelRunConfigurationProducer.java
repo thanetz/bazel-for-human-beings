@@ -84,9 +84,6 @@ public class BazelRunConfigurationProducer extends RunConfigurationProducer<Baze
             if (Consts.BINARY.contains(bazelType)){
                 bazelRunConfiguration.setName("BAZEL run " + " - " + bazelExecutablePath);
                 bazelRunConfiguration.setAction("run");
-            }else if (Consts.TEST.contains(bazelType)){
-                bazelRunConfiguration.setName("BAZEL test " + " - " + bazelExecutablePath);
-                bazelRunConfiguration.setAction("test");
             }else if (Consts.LIBRARY.contains(bazelType)){
                 bazelRunConfiguration.setName("BAZEL build " + " - " + bazelExecutablePath);
                 bazelRunConfiguration.setAction("build");
