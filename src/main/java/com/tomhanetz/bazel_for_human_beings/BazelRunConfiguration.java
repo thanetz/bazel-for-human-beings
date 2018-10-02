@@ -38,7 +38,7 @@ import java.nio.charset.Charset;
 public class BazelRunConfiguration extends LocatableConfigurationBase implements PersistentStateComponent<BazelRunConfiguration> {
 
     private String bazelExecutablePath;
-    private String action = "run";
+    private String params = "";
     private String name;
     private BazelRunConfiguration thisConfiguration;
     public static final NotificationGroup GROUP_DISPLAY_ID_INFO =
@@ -93,6 +93,9 @@ public class BazelRunConfiguration extends LocatableConfigurationBase implements
                 }else {
                     commandLine.addParameters(bazelAction, getBazelExecutablePath());
                 }
+                if (!getParams().isEmpty()){
+                    commandLine.addParameters(getParams().split(","));
+                }
                 commandLine.setCharset(Charset.forName("UTF-8"));
                 commandLine.setWorkDirectory(environment.getProject().getBasePath());
                 commandLine.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
@@ -146,5 +149,13 @@ public class BazelRunConfiguration extends LocatableConfigurationBase implements
     @Override
     public void loadState(@NotNull BazelRunConfiguration bazelRunConfiguration) {
         XmlSerializerUtil.copyBean(bazelRunConfiguration, this);
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
     }
 }

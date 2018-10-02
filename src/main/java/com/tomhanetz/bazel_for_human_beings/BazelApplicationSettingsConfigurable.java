@@ -16,7 +16,7 @@ public class BazelApplicationSettingsConfigurable implements Configurable {
     @Nls
     @Override
     public String getDisplayName() {
-        return "Bazel 4 Human Beings Configuration";
+        return "Bazel For Human Beings Configuration";
     }
 
     @Nullable
