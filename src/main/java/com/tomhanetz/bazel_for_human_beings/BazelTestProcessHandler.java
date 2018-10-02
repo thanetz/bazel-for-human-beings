@@ -136,11 +136,11 @@ public class BazelTestProcessHandler extends OSProcessHandler {
             + "\ud800\udc00-\udbff\udfff"
             + "]");
     private static final Pattern TEST_COUNT_PATTERN_WIN = Pattern.compile("Ran (\\d+) tests");
-    private static final Pattern TEST_COUNT_PATTERN_MAC = Pattern.compile("collected (\\d+) items");
+    private static final Pattern TEST_COUNT_PATTERN = Pattern.compile("collected (\\d+) items");
     private static final Pattern FAILED_TEST_PATTERN_WIN = Pattern.compile("FAIL: (.+) \\((.+)\\)");
-    private static final Pattern FAILED_TEST_PATTERN_MAC = Pattern.compile("_+ (.+) _+");
-    private static final Pattern END_FAILURES_SECTION_MAC = Pattern.compile("=+ .+ =+");
-    private static final Pattern IGNORE_FALSE_POSITIVE_PATTERN = Pattern.compile("FAIL: (.+) \\(see (.+)\\)");
+    private static final Pattern FAILED_TEST_PATTERN = Pattern.compile("_+ (.+) _+");
+    private static final Pattern END_FAILURES_SECTION = Pattern.compile("=+ .+ =+");
+    private static final Pattern IGNORE_FALSE_POSITIVE_PATTERN_WIN = Pattern.compile("FAIL: (.+) \\(see (.+)\\)");
     private static final Pattern TEST_DURATION_PATTERN = Pattern.compile(".+ Critical Path: (\\d+\\.\\d*)s");
     private static final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
@@ -189,33 +189,17 @@ public class BazelTestProcessHandler extends OSProcessHandler {
 
         text = text.replaceAll(COLOR_CODES.pattern(), "").replaceAll(ESCAPE_CHARS.pattern(), "");
 
-        Matcher ignoreFalsePositiveMatcher = IGNORE_FALSE_POSITIVE_PATTERN.matcher(text);
+        Matcher ignoreFalsePositiveMatcher = IGNORE_FALSE_POSITIVE_PATTERN_WIN.matcher(text);
         if(ignoreFalsePositiveMatcher.find()){
             return;
         }
 
-        Matcher failedTestMatcher = isWindows ? FAILED_TEST_PATTERN_WIN.matcher(text) : FAILED_TEST_PATTERN_MAC.matcher(text);
-        if(failedTestMatcher.find()){
-            if (isInFailedTest){
-                flushFailedTest();
-            }
-            failedTestName = failedTestMatcher.group(1);
-            super.notifyTextAvailable(TeamCityHandler.testStarted(failedTestName), ProcessOutputTypes.STDOUT);
-            isInFailedTest = true;
-            return;
-        }
-        if(isInFailedTest){
-            Matcher endOfFailuresSection = END_FAILURES_SECTION_MAC.matcher(text);
-            if (isWindows && text.replaceAll("\n","").replaceAll("\r", "").isEmpty() || endOfFailuresSection.find()){
-                flushFailedTest();
-                return;
-            }
-            failedTestLastRow = text.replaceAll("\n","").replaceAll("\r", "").replaceAll("'", "|'");
-            failedTestTraceback += failedTestLastRow + "|r|n";
+        if(failedTestHandler(text)){
             return;
         }
 
-        Matcher testCountMatcher = isWindows ? TEST_COUNT_PATTERN_WIN.matcher(text) : TEST_COUNT_PATTERN_MAC.matcher(text);
+
+        Matcher testCountMatcher = isWindows ? TEST_COUNT_PATTERN_WIN.matcher(text) : TEST_COUNT_PATTERN.matcher(text);
         if (testCountMatcher.find()){
             testCount = Integer.parseInt(testCountMatcher.group(1));
             isInTraceback = false;
@@ -244,5 +228,29 @@ public class BazelTestProcessHandler extends OSProcessHandler {
         super.notifyTextAvailable(TeamCityHandler.testFailed(failedTestName, failedTestLastRow, failedTestTraceback), ProcessOutputTypes.STDOUT);
         super.notifyTextAvailable(TeamCityHandler.testFinished(failedTestName, 0), ProcessOutputTypes.STDOUT);
         failedTestTraceback = "";
+    }
+
+    private boolean failedTestHandler(String text){
+        Matcher failedTestMatcher = isWindows ? FAILED_TEST_PATTERN_WIN.matcher(text) : FAILED_TEST_PATTERN.matcher(text);
+        if(failedTestMatcher.find()){
+            if (isInFailedTest){
+                flushFailedTest();
+            }
+            failedTestName = failedTestMatcher.group(1);
+            super.notifyTextAvailable(TeamCityHandler.testStarted(failedTestName), ProcessOutputTypes.STDOUT);
+            isInFailedTest = true;
+            return true;
+        }
+        if(isInFailedTest){
+            Matcher endOfFailuresSection = END_FAILURES_SECTION.matcher(text);
+            if (isWindows && text.replaceAll("\n","").replaceAll("\r", "").isEmpty() || endOfFailuresSection.find()){
+                flushFailedTest();
+                return true;
+            }
+            failedTestLastRow = text.replaceAll("\n","").replaceAll("\r", "").replaceAll("'", "|'");
+            failedTestTraceback += failedTestLastRow + "|r|n";
+            return true;
+        }
+        return false;
     }
 }
