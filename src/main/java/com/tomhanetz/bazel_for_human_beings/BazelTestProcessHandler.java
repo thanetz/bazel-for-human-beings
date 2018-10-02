@@ -57,20 +57,92 @@ INFO: Build completed, 1 test FAILED, 2 total actions
 //main/tests:testim                                                      FAILED in 5.2s
   C:/users/tom/_bazel_tom/b7obspoi/execroot/__main__/bazel-out/x64_windows-fastbuild/testlogs/main/tests/testim/test.log
 
+INFO: Build completed, 1 test FAILED, 2 total actions=========================== test session starts ==============================
+platform darwin -- Python 3.5.4, pytest-3.0.6, py-1.5.3, pluggy-0.4.0
+rootdir: /private/var/tmp/_bazel_tomhanetz/d573ed7a900b4645b9d39d6578124456/execroot/armis/bazel-out/darwin-py3-opt/bin/armis/device_detection/user_agent_detector_test.runfiles/armis, inifile:
+collected 20 items
+
+armis/device_detection/user_agent_detector_test.py I1001 22:50:46.523694 4320654144 db.py:248] trying to connect to db
+I1001 22:50:46.524055 4320654144 db.py:198] Configuring DB with uri: postgresql://postgres@127.0.0.1:57715/test
+....W1001 22:50:48.492010 4320654144 user_agent_detector.py:341] OS name mismatch by user agent: 'some user agent', Original old_operating_system, Newly detected: new_operating_system
+..FF............
+
+ generated xml file: /private/var/tmp/_bazel_tomhanetz/d573ed7a900b4645b9d39d6578124456/execroot/armis/bazel-out/darwin-py3-opt/testlogs/armis/device_detection/user_agent_detector_test/test.xml
+=================================== FAILURES ===================================
+______________ TestUserAgentDetector.test_detect_device__no_model ______________
+
+self = <armis.device_detection.user_agent_detector_test.TestUserAgentDetector object at 0x10ffff550>
+mock_detector = <armis.device_detection.user_agent_detector.UserAgentDetector object at 0x10ffff8d0>
+device = 7 | None | UNKNOWN | UNKNOWN | None
+detected_device_output = {'brand': 'brand', 'success': True, 'type': 'computer'}
+
+    def test_detect_device__no_model(self, mock_detector, device, detected_device_output):
+        detected_device_output.pop("model")
+        # pylint: disable=protected-access
+        mock_detector._detect_device.return_value = detected_device_output
+
+        detected_device = mock_detector.detect_device("", device)
+
+>       assert detected_device["model"]+"tom2" == "%s Device" % detected_device_output["brand"]
+E       assert 'brand Devicetom2' == 'brand Device'
+E         - brand Devicetom2
+E         ?             ----
+E         + brand Device
+
+armis/device_detection/user_agent_detector_test.py:151: AssertionError
+_____________ TestUserAgentDetector.test_detect_device__good_data ______________
+
+self = <armis.device_detection.user_agent_detector_test.TestUserAgentDetector object at 0x10ffecef0>
+mock_detector = <armis.device_detection.user_agent_detector.UserAgentDetector object at 0x10ffff898>
+device = 8 | None | UNKNOWN | UNKNOWN | None
+detected_device_output = {'brand': 'brand', 'model': 'model', 'success': True, 'type': 'computer'}
+
+    def test_detect_device__good_data(self, mock_detector, device, detected_device_output):
+        # pylint: disable=protected-access
+        mock_detector._detect_device.return_value = detected_device_output
+
+        detected_device = mock_detector.detect_device("", device)
+
+        assert detected_device["manufacturer"] == detected_device_output["brand"]
+>       assert detected_device["model"] == detected_device_output["model"] + "tom"
+E       assert 'model' == 'modeltom'
+E         - model
+E         + modeltom
+E         ?      +++
+
+armis/device_detection/user_agent_detector_test.py:160: AssertionError
+===================== 2 failed, 18 passed in 5.11 seconds ======================
+================================================================================
+Target //armis/device_detection:user_agent_detector_test up-to-date:
+  bazel-bin/armis/device_detection/user_agent_detector_test
+INFO: Elapsed time: 7.739s, Critical Path: 7.42s
+INFO: 1 process: 1 local.
 INFO: Build completed, 1 test FAILED, 2 total actions
+//armis/device_detection:user_agent_detector_test                        FAILED in 7.4s
+  /private/var/tmp/_bazel_tomhanetz/d573ed7a900b4645b9d39d6578124456/execroot/armis/bazel-out/darwin-py3-opt/testlogs/armis/device_detection/user_agent_detector_test/test.log
 
-C:\Users\tom\PycharmProjects\testim>
-
-
+INFO: Build completed, 1 test FAILED, 2 total actions
 
 
  */
 
 public class BazelTestProcessHandler extends OSProcessHandler {
 
-    private static final Pattern TEST_COUNT_PATTERN = Pattern.compile("Ran (\\d+) tests");
-    private static final Pattern FAILED_TEST_PATTERN = Pattern.compile("FAIL: (.+) \\((.+)\\)");
+    private static final Pattern COLOR_CODES = Pattern.compile("\\[\\d+m");
+    private static final Pattern ESCAPE_CHARS = Pattern.compile("[^"
+            + "\u0009\r\n"
+            + "\u0020-\uD7FF"
+            + "\uE000-\uFFFD"
+            + "\ud800\udc00-\udbff\udfff"
+            + "]");
+    private static final Pattern TEST_COUNT_PATTERN_WIN = Pattern.compile("Ran (\\d+) tests");
+    private static final Pattern TEST_COUNT_PATTERN_MAC = Pattern.compile("collected (\\d+) items");
+    private static final Pattern FAILED_TEST_PATTERN_WIN = Pattern.compile("FAIL: (.+) \\((.+)\\)");
+    private static final Pattern FAILED_TEST_PATTERN_MAC = Pattern.compile("_+ (.+) _+");
+    private static final Pattern END_FAILURES_SECTION_MAC = Pattern.compile("=+ .+ =+");
     private static final Pattern IGNORE_FALSE_POSITIVE_PATTERN = Pattern.compile("FAIL: (.+) \\(see (.+)\\)");
+    private static final Pattern TEST_DURATION_PATTERN = Pattern.compile(".+ Critical Path: (\\d+\\.\\d*)s");
+    private static final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
     private boolean testSuiteStarted = false;
     private String bazelCommand;
@@ -83,6 +155,7 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     private boolean isInFailedTest = false;
     private int testCount = 0;
     private int failedTestCount = 0;
+    private float testDuration = 0;
 
     private final Logger log = Logger.getInstance("Bazel com.tomhanetz.bazel_for_human_beings.BazelTestProcessHandler");
 
@@ -108,39 +181,41 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     }
 
     private void parseCommands(String text, @NotNull Key outputType){
-        log.debug("received text: " + text);
+        log.info("received text: " + text);
 
         if(text == null){
             return;
         }
+
+        text = text.replaceAll(COLOR_CODES.pattern(), "").replaceAll(ESCAPE_CHARS.pattern(), "");
 
         Matcher ignoreFalsePositiveMatcher = IGNORE_FALSE_POSITIVE_PATTERN.matcher(text);
         if(ignoreFalsePositiveMatcher.find()){
             return;
         }
 
-        Matcher failedTestMatcher = FAILED_TEST_PATTERN.matcher(text);
+        Matcher failedTestMatcher = isWindows ? FAILED_TEST_PATTERN_WIN.matcher(text) : FAILED_TEST_PATTERN_MAC.matcher(text);
         if(failedTestMatcher.find()){
+            if (isInFailedTest){
+                flushFailedTest();
+            }
             failedTestName = failedTestMatcher.group(1);
             super.notifyTextAvailable(TeamCityHandler.testStarted(failedTestName), ProcessOutputTypes.STDOUT);
             isInFailedTest = true;
             return;
         }
         if(isInFailedTest){
-            if (text.replaceAll("\n","").replaceAll("\r", "").isEmpty()){
-                isInFailedTest = false;
-                failedTestCount += 1;
-                super.notifyTextAvailable(TeamCityHandler.testFailed(failedTestName, failedTestLastRow, failedTestTraceback), ProcessOutputTypes.STDOUT);
-                super.notifyTextAvailable(TeamCityHandler.testFinished(failedTestName, 0), ProcessOutputTypes.STDOUT);
-                failedTestTraceback = "";
+            Matcher endOfFailuresSection = END_FAILURES_SECTION_MAC.matcher(text);
+            if (isWindows && text.replaceAll("\n","").replaceAll("\r", "").isEmpty() || endOfFailuresSection.find()){
+                flushFailedTest();
                 return;
             }
-            failedTestLastRow = text.replaceAll("\n","").replaceAll("\r", "");
+            failedTestLastRow = text.replaceAll("\n","").replaceAll("\r", "").replaceAll("'", "|'");
             failedTestTraceback += failedTestLastRow + "|r|n";
             return;
         }
 
-        Matcher testCountMatcher = TEST_COUNT_PATTERN.matcher(text);
+        Matcher testCountMatcher = isWindows ? TEST_COUNT_PATTERN_WIN.matcher(text) : TEST_COUNT_PATTERN_MAC.matcher(text);
         if (testCountMatcher.find()){
             testCount = Integer.parseInt(testCountMatcher.group(1));
             isInTraceback = false;
@@ -149,15 +224,25 @@ public class BazelTestProcessHandler extends OSProcessHandler {
         }
 
         //Get Test Results
+        Matcher testDurationMatcher = TEST_DURATION_PATTERN.matcher(text);
+        if(testDurationMatcher.find()){
+            testDuration = Float.parseFloat(testDurationMatcher.group(1));
+        }
+
         if(text.startsWith(bazelCommand)){
-            String[] parts = text.split("in ");
-            String runTime = parts[parts.length - 1];
-            float testDuration = Float.parseFloat(runTime.split("s")[0]);
             if (testCount - failedTestCount > 0){
                 String testName = String.format("%d Successful tests", testCount - failedTestCount);
-                super.notifyTextAvailable(TeamCityHandler.testStarted(testName), ProcessOutputTypes.STDOUT);
-                super.notifyTextAvailable(TeamCityHandler.testFinished(testName, (int)(testDuration * 1000)), ProcessOutputTypes.STDOUT);
+                super.notifyTextAvailable(TeamCityHandler.testStarted(testName)+"\r\n", ProcessOutputTypes.STDOUT);
+                super.notifyTextAvailable(TeamCityHandler.testFinished(testName, (int)(testDuration * 1000)) + "\r\n", ProcessOutputTypes.STDOUT);
             }
         }
+    }
+
+    private void flushFailedTest(){
+        isInFailedTest = false;
+        failedTestCount += 1;
+        super.notifyTextAvailable(TeamCityHandler.testFailed(failedTestName, failedTestLastRow, failedTestTraceback), ProcessOutputTypes.STDOUT);
+        super.notifyTextAvailable(TeamCityHandler.testFinished(failedTestName, 0), ProcessOutputTypes.STDOUT);
+        failedTestTraceback = "";
     }
 }

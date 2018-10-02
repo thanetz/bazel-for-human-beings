@@ -34,8 +34,15 @@ public class BazelRunConfigurationProducer extends RunConfigurationProducer<Baze
             return cache.get(directoryPath+":::"+name);
         }
 
-        String bazelExecutablePath = Utils.runCommand(new String[]{bazelPath, "query",
+        String bazelExecutablePaths = Utils.runCommand(new String[]{bazelPath, "query",
                 "attr('srcs', '" + name + "', ':*')"}, directoryPath);
+
+        //get only first appearance
+        String[] parts = bazelExecutablePaths.split("//");
+        if (parts.length == 1){
+            return null;
+        }
+        String bazelExecutablePath = "//" + bazelExecutablePaths.split("//")[1];
 
         cache.put(directoryPath+":::"+name, bazelExecutablePath);
 

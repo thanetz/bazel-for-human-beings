@@ -10,6 +10,8 @@ public class Utils {
 
     private static final Logger log = Logger.getInstance("com.tomhanetz.bazel_for_human_beings.Utils");
 
+    public static String colorCodeRegex = "\\[\\d+m";
+
     public static String runCommand(String[] cmds, String directory) throws IOException {
         File directoryHandle = new File(directory);
         Runtime rt = Runtime.getRuntime();
@@ -24,19 +26,17 @@ public class Utils {
         StringBuilder result = new StringBuilder();
         String outLine;
         while ((outLine = stdInput.readLine()) != null) {
-            if (outLine.endsWith("[0m")){
-                outLine = outLine.substring(0, outLine.length() - 3);
-            }
+            outLine = outLine.replaceAll(colorCodeRegex, "");
             result.append(outLine);
         }
 
         String errLine = errInput.readLine();
-        if (errLine != null && !errLine.isEmpty() && !errLine.trim().equals("[0m")) {
+        errLine = errLine != null ? errLine.replaceAll(colorCodeRegex, "") : null;
+        if (errLine != null && !errLine.trim().isEmpty()) {
+            errLine = errLine.replaceAll(colorCodeRegex, "");
             StringBuilder error = new StringBuilder(errLine);
             while ((errLine = errInput.readLine()) != null) {
-                if (errLine.endsWith("[0m")){
-                    errLine = outLine.substring(0, errLine.length() - 3);
-                }
+                errLine = errLine.replaceAll(colorCodeRegex, "");
                 error.append(errLine);
             }
             log.warn("Command Line Error received: " + error.toString());

@@ -11,12 +11,17 @@ import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil;
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties;
 import com.intellij.execution.testframework.ui.BaseTestsOutputConsoleView;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationDisplayType;
+import com.intellij.notification.NotificationGroup;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +41,9 @@ public class BazelRunConfiguration extends LocatableConfigurationBase implements
     private String action = "run";
     private String name;
     private BazelRunConfiguration thisConfiguration;
+    public static final NotificationGroup GROUP_DISPLAY_ID_INFO =
+            new NotificationGroup("My notification group",
+                    NotificationDisplayType.BALLOON, true);
 
 
     public BazelRunConfiguration(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
@@ -56,10 +64,12 @@ public class BazelRunConfiguration extends LocatableConfigurationBase implements
 
         String bazelTypeResult = null;
         try {
-            bazelTypeResult = Utils.runCommand(new String[]{BazelApplicationSettings.getInstance().getBazelRunPath(), "query",
+            bazelTypeResult = Utils.runCommand(new String[]{BazelApplicationSettings.getInstance().getBazelQueryPath(), "query",
                     "kind(rule, "  + bazelExecutablePath + ")", "--output", "label_kind"}, environment.getProject().getBasePath());
         } catch (IOException e) {
             e.printStackTrace();
+            Notification notification = GROUP_DISPLAY_ID_INFO.createNotification("Unable to run: " + e.getMessage(), MessageType.ERROR);
+            Notifications.Bus.notify(notification);
             return null;
         }
         String bazelType = bazelTypeResult.split(" ")[0];
