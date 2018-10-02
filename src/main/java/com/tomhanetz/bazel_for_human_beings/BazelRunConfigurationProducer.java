@@ -54,6 +54,9 @@ public class BazelRunConfigurationProducer extends RunConfigurationProducer<Baze
         try {
             // returns //a/b/c:my_exec
             String bazelExecutablePath = getBazelPath(configurationContext);
+            if (bazelExecutablePath == null){
+                return false;
+            }
             bazelRunConfiguration.setName("BAZEL: " + bazelExecutablePath);
             log.info("Successfully received bazel executable path of: " + bazelExecutablePath);
 
