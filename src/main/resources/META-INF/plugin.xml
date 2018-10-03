@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.tomhanetz.bazel_for_human_beings</id>
     <name>Bazel For Human Beings</name>
-    <vendor email="tomhanetz@gmail.com" url="">Tom Hanetz</vendor>
+    <vendor email="tomhanetz@gmail.com" url="https://github.com/tomhanetz/bazel-for-human-beings">Tom Hanetz</vendor>
 
     <description><![CDATA[
     Lightweight plugin for python bazel support in all of Jetbrains IntelliJ based products<br>
