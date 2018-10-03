@@ -135,14 +135,13 @@ public class BazelTestProcessHandler extends OSProcessHandler {
             + "\uE000-\uFFFD"
             + "\ud800\udc00-\udbff\udfff"
             + "]");
-    private static final Pattern TEST_COUNT_PATTERN_WIN = Pattern.compile("Ran (\\d+) tests");
-    private static final Pattern TEST_COUNT_PATTERN = Pattern.compile("collected (\\d+) items");
-    private static final Pattern FAILED_TEST_PATTERN_WIN = Pattern.compile("FAIL: (.+) \\((.+)\\)");
-    private static final Pattern FAILED_TEST_PATTERN = Pattern.compile("_+ (.+) _+");
-    private static final Pattern END_FAILURES_SECTION = Pattern.compile("=+ .+ =+");
-    private static final Pattern IGNORE_FALSE_POSITIVE_PATTERN_WIN = Pattern.compile("FAIL: (.+) \\(see (.+)\\)");
+    private static final Pattern TEST_COUNT_PATTERN = Pattern.compile("Ran (\\d+) tests");
+    private static final Pattern TEST_COUNT_PATTERN_PYTEST = Pattern.compile("collected (\\d+) items");
+    private static final Pattern FAILED_TEST_PATTERN = Pattern.compile("FAIL: (.+) \\((.+)\\)");
+    private static final Pattern FAILED_TEST_PATTERN_PYTEST = Pattern.compile("_+ (.+) _+");
+    private static final Pattern END_FAILURES_SECTION_PYTEST = Pattern.compile("=+ .+ =+");
+    private static final Pattern IGNORE_FALSE_POSITIVE_PATTERN = Pattern.compile("FAIL: (.+) \\(see (.+)\\)");
     private static final Pattern TEST_DURATION_PATTERN = Pattern.compile(".+ Critical Path: (\\d+\\.\\d*)s");
-    private static final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
     private boolean testSuiteStarted = false;
     private String bazelCommand;
@@ -150,8 +149,7 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     private String failedTestTraceback = "";
     private String failedTestName = "";
     private String failedTestLastRow = "";
-    private boolean isInTraceback = false;
-    private boolean finishedTraceback = false;
+    private boolean isPyTest = false;
     private boolean isInFailedTest = false;
     private int testCount = 0;
     private int failedTestCount = 0;
@@ -189,7 +187,7 @@ public class BazelTestProcessHandler extends OSProcessHandler {
 
         text = text.replaceAll(COLOR_CODES.pattern(), "").replaceAll(ESCAPE_CHARS.pattern(), "");
 
-        Matcher ignoreFalsePositiveMatcher = IGNORE_FALSE_POSITIVE_PATTERN_WIN.matcher(text);
+        Matcher ignoreFalsePositiveMatcher = IGNORE_FALSE_POSITIVE_PATTERN.matcher(text);
         if(ignoreFalsePositiveMatcher.find()){
             return;
         }
@@ -199,11 +197,15 @@ public class BazelTestProcessHandler extends OSProcessHandler {
         }
 
 
-        Matcher testCountMatcher = isWindows ? TEST_COUNT_PATTERN_WIN.matcher(text) : TEST_COUNT_PATTERN.matcher(text);
+        Matcher testCountMatcher = TEST_COUNT_PATTERN.matcher(text);
         if (testCountMatcher.find()){
             testCount = Integer.parseInt(testCountMatcher.group(1));
-            isInTraceback = false;
-            finishedTraceback = true;
+            return;
+        }
+
+        Matcher pyTestCountMatcher = TEST_COUNT_PATTERN_PYTEST.matcher(text);
+        if (pyTestCountMatcher.find()){
+            testCount = Integer.parseInt(pyTestCountMatcher.group(1));
             return;
         }
 
@@ -231,8 +233,13 @@ public class BazelTestProcessHandler extends OSProcessHandler {
     }
 
     private boolean failedTestHandler(String text){
-        Matcher failedTestMatcher = isWindows ? FAILED_TEST_PATTERN_WIN.matcher(text) : FAILED_TEST_PATTERN.matcher(text);
-        if(failedTestMatcher.find()){
+        Matcher failedTestMatcher = FAILED_TEST_PATTERN.matcher(text);
+        Matcher pyTestFailedTestMatcher = FAILED_TEST_PATTERN_PYTEST.matcher(text);
+        if(pyTestFailedTestMatcher.find()){
+            isPyTest = true;
+            failedTestMatcher = pyTestFailedTestMatcher;
+        }
+        if(failedTestMatcher.find(0)){
             if (isInFailedTest){
                 flushFailedTest();
             }
@@ -242,8 +249,8 @@ public class BazelTestProcessHandler extends OSProcessHandler {
             return true;
         }
         if(isInFailedTest){
-            Matcher endOfFailuresSection = END_FAILURES_SECTION.matcher(text);
-            if (isWindows && text.replaceAll("\n","").replaceAll("\r", "").isEmpty() || endOfFailuresSection.find()){
+            Matcher endOfFailuresSection = END_FAILURES_SECTION_PYTEST.matcher(text);
+            if (!isPyTest && text.replaceAll("\n","").replaceAll("\r", "").isEmpty() || isPyTest && endOfFailuresSection.find()){
                 flushFailedTest();
                 return true;
             }
