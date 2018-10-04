@@ -35,7 +35,7 @@ public class BazelRunConfigurationProducer extends RunConfigurationProducer<Baze
         }
 
         String bazelExecutablePaths = Utils.runCommand(new String[]{bazelPath, "query",
-                "attr('srcs', '" + name + "', ':*')"}, directoryPath);
+                "attr('srcs', ':" + name + "', ':*')"}, directoryPath);
 
         //get only first appearance
         String[] parts = bazelExecutablePaths.split("//");
