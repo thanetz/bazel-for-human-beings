@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.tomhanetz'
-version '0.0.2-SNAPSHOT'
+version '0.0.3-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -17,7 +17,7 @@ dependencies {
 }
 
 intellij {
-    version '2018.2'
+    version '2018.3'
 }
 patchPluginXml {
     changeNotes """
