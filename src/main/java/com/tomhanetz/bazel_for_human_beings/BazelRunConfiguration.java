@@ -35,7 +35,7 @@ import java.nio.charset.Charset;
                 @Storage("bazel_4_human_beings_run_settings.xml")
         }
 )
-public class BazelRunConfiguration extends LocatableConfigurationBase implements PersistentStateComponent<BazelRunConfiguration> {
+public class BazelRunConfiguration extends LocatableConfigurationBase<BazelRunConfiguration> implements PersistentStateComponent<BazelRunConfiguration> {
 
     private String bazelExecutablePath;
     private String params = "";
