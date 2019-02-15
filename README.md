@@ -73,4 +73,4 @@ Using gradle jar task
 
 ## Version Support
 
-PyCharm 2018.2
+PyCharm 2018.3
